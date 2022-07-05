@@ -19,6 +19,9 @@ SetUpTestSuite run!
 TearDownTestSuite run!
 [----------] Finished with tests from CompletelyFilteredTest
 --- FAIL: TestSomething (1.23s)
+    --- FAIL: TestSomething (1.23s)
+        --- FAIL: TestSomething (1.23s)
+        --- FAIL: TestSomething (1.23s)
 FAIL
 exit status 1
 FAIL somepkg 1.234s

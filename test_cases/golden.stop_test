@@ -9,5 +9,7 @@ TearDown running.
 [       OK ] StopTest.Second
 TearDownTestSuite running.
 Exiting early due to user request.
+--- FAIL: TestSomething (1.23s)
+FAIL
 exit status 1
 FAIL somepkg 1.234s

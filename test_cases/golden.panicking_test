@@ -79,6 +79,14 @@ github.com/jacobsa/ogletest.RegisterTestSuite.func5
 [  FAILED  ] TearDownPanicTest.SomeTestCase
 [----------] Finished with tests from TearDownPanicTest
 --- FAIL: TestSomething (1.23s)
+    --- FAIL: TestSomething (1.23s)
+        --- FAIL: TestSomething (1.23s)
+        --- FAIL: TestSomething (1.23s)
+        --- FAIL: TestSomething (1.23s)
+    --- FAIL: TestSomething (1.23s)
+        --- FAIL: TestSomething (1.23s)
+    --- FAIL: TestSomething (1.23s)
+        --- FAIL: TestSomething (1.23s)
 FAIL
 exit status 1
 FAIL somepkg 1.234s

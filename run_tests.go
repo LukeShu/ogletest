@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"os"
 	"path"
 	"regexp"
 	"runtime"
@@ -132,86 +131,75 @@ func StopRunningTests() {
 func runTestsInternal(t *testing.T) {
 	// Process each registered suite.
 	for _, suite := range registeredSuites {
-		// Stop now if we've already seen a failure and we've been told to stop
-		// early.
+		t.Run(suite.Name, func(t *testing.T) {
+			// Print a banner.
+			fmt.Printf("[----------] Running tests from %s\n", suite.Name)
+
+			// Run the SetUp function, if any.
+			if suite.SetUp != nil {
+				suite.SetUp()
+			}
+			// Arrange to run the suite's TearDown function, if any.
+			if suite.TearDown != nil {
+				t.Cleanup(suite.TearDown)
+			}
+
+			// Run each test function that the user has not told us to skip.
+			for _, tf := range filterTestFunctions(suite) {
+				t.Run(tf.Name, func(t *testing.T) {
+					// Print a banner for the start of this test function.
+					fmt.Printf("[ RUN      ] %s.%s\n", suite.Name, tf.Name)
+
+					// Run the test function.
+					startTime := time.Now()
+					failures := runTestFunction(t, tf)
+					runDuration := time.Since(startTime)
+
+					// Print any failures, and mark the test as having failed if there are any.
+					for _, record := range failures {
+						t.Fail()
+						fmt.Printf(
+							"%s:%d:\n%s\n\n",
+							record.FileName,
+							record.LineNumber,
+							record.Error)
+					}
+
+					// Print a banner for the end of the test.
+					bannerMessage := "[       OK ]"
+					if len(failures) != 0 {
+						bannerMessage = "[  FAILED  ]"
+					}
+
+					// Print a summary of the time taken, if long enough.
+					var timeMessage string
+					if runDuration >= 25*time.Millisecond {
+						timeMessage = fmt.Sprintf(" (%s)", runDuration.String())
+					}
+
+					fmt.Printf(
+						"%s %s.%s%s\n",
+						bannerMessage,
+						suite.Name,
+						tf.Name,
+						timeMessage)
+				})
+				if atomic.LoadUint64(&gStopRunning) != 0 {
+					break
+				}
+				if t.Failed() && *fStopEarly {
+					break
+				}
+			}
+		})
+		if atomic.LoadUint64(&gStopRunning) != 0 {
+			fmt.Println("Exiting early due to user request.")
+			t.FailNow()
+		}
+		fmt.Printf("[----------] Finished with tests from %s\n", suite.Name)
 		if t.Failed() && *fStopEarly {
 			break
 		}
-
-		// Print a banner.
-		fmt.Printf("[----------] Running tests from %s\n", suite.Name)
-
-		// Run the SetUp function, if any.
-		if suite.SetUp != nil {
-			suite.SetUp()
-		}
-
-		// Run each test function that the user has not told us to skip.
-		stoppedEarly := false
-		for _, tf := range filterTestFunctions(suite) {
-			// Did the user request that we stop running tests? If so, skip the rest
-			// of this suite (and exit after tearing it down).
-			if atomic.LoadUint64(&gStopRunning) != 0 {
-				stoppedEarly = true
-				break
-			}
-
-			// Print a banner for the start of this test function.
-			fmt.Printf("[ RUN      ] %s.%s\n", suite.Name, tf.Name)
-
-			// Run the test function.
-			startTime := time.Now()
-			failures := runTestFunction(t, tf)
-			runDuration := time.Since(startTime)
-
-			// Print any failures, and mark the test as having failed if there are any.
-			for _, record := range failures {
-				t.Fail()
-				fmt.Printf(
-					"%s:%d:\n%s\n\n",
-					record.FileName,
-					record.LineNumber,
-					record.Error)
-			}
-
-			// Print a banner for the end of the test.
-			bannerMessage := "[       OK ]"
-			if len(failures) != 0 {
-				bannerMessage = "[  FAILED  ]"
-			}
-
-			// Print a summary of the time taken, if long enough.
-			var timeMessage string
-			if runDuration >= 25*time.Millisecond {
-				timeMessage = fmt.Sprintf(" (%s)", runDuration.String())
-			}
-
-			fmt.Printf(
-				"%s %s.%s%s\n",
-				bannerMessage,
-				suite.Name,
-				tf.Name,
-				timeMessage)
-
-			// Stop running tests from this suite if we've been told to stop early
-			// and this test failed.
-			if t.Failed() && *fStopEarly {
-				break
-			}
-		}
-
-		// Run the suite's TearDown function, if any.
-		if suite.TearDown != nil {
-			suite.TearDown()
-		}
-
-		// Were we told to exit early?
-		if stoppedEarly {
-			fmt.Println("Exiting early due to user request.")
-			os.Exit(1)
-		}
-
-		fmt.Printf("[----------] Finished with tests from %s\n", suite.Name)
 	}
 }
 

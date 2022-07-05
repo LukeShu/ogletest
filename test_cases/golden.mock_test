@@ -20,6 +20,10 @@ Unexpected call to At with args: [11 23]
 [       OK ] MockTest.InvokeFunction
 [----------] Finished with tests from MockTest
 --- FAIL: TestSomething (1.23s)
+    --- FAIL: TestSomething (1.23s)
+        --- FAIL: TestSomething (1.23s)
+        --- FAIL: TestSomething (1.23s)
+        --- FAIL: TestSomething (1.23s)
 FAIL
 exit status 1
 FAIL somepkg 1.234s
