@@ -6,8 +6,6 @@ panic: Panic in ExplicitPanic
 
 github.com/jacobsa/ogletest/somepkg_test.(*PanickingTest).ExplicitPanic
 	some_file.txt:0
-runtime.callXX
-	some_file.txt:0
 reflect.Value.call
 	some_file.txt:0
 reflect.Value.Call
@@ -24,8 +22,6 @@ github.com/jacobsa/ogletest/somepkg_test.someFuncThatPanics
 	some_file.txt:0
 github.com/jacobsa/ogletest/somepkg_test.(*PanickingTest).ExplicitPanicInHelperFunction
 	some_file.txt:0
-runtime.callXX
-	some_file.txt:0
 reflect.Value.call
 	some_file.txt:0
 reflect.Value.Call
@@ -39,8 +35,6 @@ panicking_test.go:56:
 panic: runtime error: invalid memory address or nil pointer dereference
 
 github.com/jacobsa/ogletest/somepkg_test.(*PanickingTest).NilPointerDerefence
-	some_file.txt:0
-runtime.callXX
 	some_file.txt:0
 reflect.Value.call
 	some_file.txt:0
