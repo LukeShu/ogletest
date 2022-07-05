@@ -50,10 +50,10 @@ func isAbortError(x interface{}) bool {
 }
 
 // Run a single test function, returning a slice of failure records.
-func runTestFunction(tf TestFunction) (failures []FailureRecord) {
+func runTestFunction(t testing.TB, tf TestFunction) (failures []FailureRecord) {
 	// Set up a clean slate for this test. Make sure to reset it after everything
 	// below is finished, so we don't accidentally use it elsewhere.
-	currentlyRunningTest = newTestInfo()
+	currentlyRunningTest = newTestInfo(t)
 	defer func() {
 		currentlyRunningTest = nil
 	}()
@@ -161,7 +161,7 @@ func runTestsInternal(t *testing.T) {
 
 			// Run the test function.
 			startTime := time.Now()
-			failures := runTestFunction(tf)
+			failures := runTestFunction(t, tf)
 			runDuration := time.Since(startTime)
 
 			// Print any failures, and mark the test as having failed if there are any.

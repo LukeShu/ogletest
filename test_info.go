@@ -17,6 +17,7 @@ package ogletest
 
 import (
 	"sync"
+	"testing"
 
 	"golang.org/x/net/context"
 
@@ -52,12 +53,14 @@ type TestInfo struct {
 var currentlyRunningTest *TestInfo
 
 // newTestInfo creates a valid but empty TestInfo struct.
-func newTestInfo() (info *TestInfo) {
-	info = &TestInfo{}
+func newTestInfo(t testing.TB) *TestInfo {
+	info := &TestInfo{}
 	info.MockController = oglemock.NewController(&testInfoErrorReporter{info})
-	info.Ctx = context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	info.Ctx = ctx
 
-	return
+	return info
 }
 
 // testInfoErrorReporter is an oglemock.ErrorReporter that writes failure

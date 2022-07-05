@@ -27,8 +27,8 @@ import (
 ////////////////////////////////////////////////////////////////////////
 
 // Set up a new test state with empty fields.
-func setUpCurrentTest() {
-	currentlyRunningTest = newTestInfo()
+func setUpCurrentTest(t testing.TB) {
+	currentlyRunningTest = newTestInfo(t)
 }
 
 type fakeExpectThatMatcher struct {
@@ -86,7 +86,7 @@ func TestNoCurrentTest(t *testing.T) {
 }
 
 func TestNoFailure(t *testing.T) {
-	setUpCurrentTest()
+	setUpCurrentTest(t)
 	matcher := &fakeExpectThatMatcher{"", nil}
 	ExpectThat(17, matcher)
 
@@ -108,13 +108,13 @@ func TestInvalidFormatString(t *testing.T) {
 		}
 	}()
 
-	setUpCurrentTest()
+	setUpCurrentTest(t)
 	matcher := &fakeExpectThatMatcher{"", errors.New("")}
 	ExpectThat(17, matcher, 19, "blah")
 }
 
 func TestNoMatchWithoutErrorText(t *testing.T) {
-	setUpCurrentTest()
+	setUpCurrentTest(t)
 	matcher := &fakeExpectThatMatcher{"taco", errors.New("")}
 	ExpectThat(17, matcher)
 
@@ -127,7 +127,7 @@ func TestNoMatchWithoutErrorText(t *testing.T) {
 }
 
 func TestNoMatchWithErrorTExt(t *testing.T) {
-	setUpCurrentTest()
+	setUpCurrentTest(t)
 	matcher := &fakeExpectThatMatcher{"taco", errors.New("which is foo")}
 	ExpectThat(17, matcher)
 
@@ -141,7 +141,7 @@ func TestNoMatchWithErrorTExt(t *testing.T) {
 }
 
 func TestFailureWithUserMessage(t *testing.T) {
-	setUpCurrentTest()
+	setUpCurrentTest(t)
 	matcher := &fakeExpectThatMatcher{"taco", errors.New("")}
 	ExpectThat(17, matcher, "Asd: %d %s", 19, "taco")
 
@@ -152,7 +152,7 @@ func TestFailureWithUserMessage(t *testing.T) {
 }
 
 func TestAdditionalFailure(t *testing.T) {
-	setUpCurrentTest()
+	setUpCurrentTest(t)
 	matcher := &fakeExpectThatMatcher{"", errors.New("")}
 
 	// Fail twice.
