@@ -28,6 +28,8 @@ import (
 	"strings"
 	"syscall"
 	"testing"
+
+	"github.com/pmezard/go-difflib/difflib"
 )
 
 const ogletestPkg = "github.com/jacobsa/ogletest"
@@ -214,7 +216,7 @@ func runTestCase(name string) ([]byte, int, error) {
 // checkGolden file checks the supplied actual output for the named test case
 // against the golden file for that case. If requested by the user, it rewrites
 // the golden file on failure.
-func checkAgainstGoldenFile(caseName string, output []byte) bool {
+func checkAgainstGoldenFile(t *testing.T, caseName string, output []byte) {
 	goldenFile := path.Join("test_cases", "golden."+caseName+"_test")
 	goldenContents := readFileOrDie(goldenFile)
 
@@ -223,7 +225,17 @@ func checkAgainstGoldenFile(caseName string, output []byte) bool {
 		writeContentsToFileOrDie(output, goldenFile)
 	}
 
-	return result
+	if !result {
+		diff, _ := difflib.GetUnifiedDiffString(difflib.UnifiedDiff{
+			A:        difflib.SplitLines(string(goldenContents)),
+			B:        difflib.SplitLines(string(output)),
+			FromFile: goldenFile,
+			ToFile:   "Actual Test Output",
+			Context:  3,
+		})
+		t.Errorf("Output for test case %q doesn't match golden file:\n%s",
+			caseName, diff)
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -261,8 +273,6 @@ func TestGoldenFiles(t *testing.T) {
 		}
 
 		// Check the output against the golden file.
-		if !checkAgainstGoldenFile(caseName, output) {
-			t.Errorf("Output for test case %s doesn't match golden file.", caseName)
-		}
+		checkAgainstGoldenFile(t, caseName, output)
 	}
 }
